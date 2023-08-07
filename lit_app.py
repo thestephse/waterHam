@@ -3,7 +3,6 @@ import requests
 import json
 import datetime
 import pandas as pd
-import matplotlib.pyplot as plt
 import altair as alt
 from dotenv import load_dotenv
 import os
@@ -173,21 +172,18 @@ def main():
     #Group dates
     df2['time'] = pd.to_datetime(df2['time'])
     df2['just_date'] = df2['time'].dt.date
-    daily_change = df2.groupby('just_date')['change'].sum().reset_index()
+    df2['daily_total_change'] = df2.groupby(df2['time'].dt.date)['change'].cumsum()
 
     
     st.write(df2)
     
     
-    # Plotting
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.bar(daily_change['just_date'], daily_change['change'])
-    ax.set_ylabel('Total Change (mm)')
-    ax.set_xlabel('Date')
-    ax.set_title('Daily Total Change in mm')
-    
-    st.pyplot(fig)
-        
+    # For the daily mm change:
+    st.bar_chart(df2.set_index('just_date')['change'], use_container_width=True)
+
+    # For the daily total change:
+    st.bar_chart(df2.set_index('just_date')['daily_total_change'], use_container_width=True)
+
 
 if __name__ == "__main__":
     main()
