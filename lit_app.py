@@ -3,7 +3,7 @@ import requests
 import json
 import datetime
 import pandas as pd
-
+import matplotlib.pyplot as plt
 import altair as alt
 from dotenv import load_dotenv
 import os
@@ -168,14 +168,26 @@ def main():
     df2 = pd.DataFrame(history_list)
     df2['change'] = df2['DISTANCE'].diff()
     
-    st.write(df2)
+    
     st.title("Daily MM Change Visualization")
-
-
+    #Group dates
+    df2['time'] = pd.to_datetime(df2['time'])
+    df2['just_date'] = df2['time'].dt.date
+    daily_change = df2.groupby('just_date')['change'].sum().reset_index()
 
     
+    st.write(df2)
     
     
+    # Plotting
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.bar(daily_change['just_date'], daily_change['change'])
+    ax.set_ylabel('Total Change (mm)')
+    ax.set_xlabel('Date')
+    ax.set_title('Daily Total Change in mm')
+    
+    st.pyplot(fig)
+        
 
 if __name__ == "__main__":
     main()
